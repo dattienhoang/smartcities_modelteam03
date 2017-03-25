@@ -73,7 +73,6 @@ def rdf(coord_sta, coord_inp, rng=0.5, wt=1, label_sta=None, plot_bin = 0.170/3)
         xrng = axes.get_xlim()
         yrng = axes.get_ylim()
         plt.show()
-    plt_typ = 'heatmap'
     if plt_typ == 'heatmap':
         import seaborn as sns
         g = sns.jointplot(coord_inp[w,0], coord_inp[w,1], kind="kde", xlim=xrng, ylim=yrng)
