@@ -7,6 +7,7 @@ Created on Sat Mar 25 10:42:56 2017
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def rdf(coord_sta, coord_inp, rng=0.5, label_sta=None, plot_bin = 0.170):
     # assumptions:
@@ -14,6 +15,7 @@ def rdf(coord_sta, coord_inp, rng=0.5, label_sta=None, plot_bin = 0.170):
     # coord_inp is a two column numpy array with labels [lon, lat]
     # rng is a distance in miles, represents the maximum distance you are looking at
     #     set to None type if 
+    # label_sta is the label for the subway station of coord_sta
     from math import radians, cos, sin, asin, sqrt
     def haversine(lon1, lat1, lon2, lat2):
         """
@@ -31,6 +33,8 @@ def rdf(coord_sta, coord_inp, rng=0.5, label_sta=None, plot_bin = 0.170):
         # convert from km to miles
         dist = km/0.621371
         return dist
+    if label_sta == None:
+        label_sta = '?? subway station ??'
     # convert the coord_sta to numpy array
     coord_sta = np.asarray(coord_sta)
     # compute all the distances...then filter for those that are less than specified range 
@@ -41,8 +45,34 @@ def rdf(coord_sta, coord_inp, rng=0.5, label_sta=None, plot_bin = 0.170):
         w = np.where(res < rng)
         # make sure that res is a numpy array
         res = res[w]
+    else:
+        w = range(len(res))
     # now make a plot that shows frequency histogram
     # in NYC, average block is 264 x 900 ft
     # 1 mile = 5280 ft, hence the default
+    # also have a subplot that just plain 
+    if plot_bin != False:
+        hist, bin_edges = np.histogram(res, bins=plot_bin)
+        
+        f, axarr = plt.subplots(2, 2)
+        axarr[0, 0].hist(bin_edges, hist)
+        axarr[0, 0].set_title('Distance Frequency of Crime around ' + label_sta)
+        axarr[0, 1].scatter(coord_sta[0], coord_sta[1])
+        axarr[0, 1].scatter(coord_inp[w,0], coord_inp[w,1])
+        axarr[0, 1].set_title('Axis [0,1]')
+        #axarr[1, 0].plot(x, y ** 2)
+        #axarr[1, 0].set_title('Axis [1,0]')
+        #axarr[1, 1].scatter(x, y ** 2)
+        #axarr[1, 1].set_title('Axis [1,1]')
     
     
+dummy_sta = [40.756266207, -73.990501248]
+dummy_inp = [
+        [40.828754623, -73.866593516],
+        [40.809859893, -73.937644103],
+        [40.719711494, -73.9894242],
+        [40.694514975, -73.849134227],
+        [40.649370541, -73.960872294]
+        ]
+
+rdf(dummy_sta, dummy_inp)
