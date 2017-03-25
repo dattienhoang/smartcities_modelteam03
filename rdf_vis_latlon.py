@@ -38,9 +38,9 @@ def rdf(coord_sta, coord_inp, rng=0.5, label_sta=None, plot_bin = 0.170):
     # convert the coord_sta to numpy array
     coord_sta = np.asarray(coord_sta)
     # compute all the distances...then filter for those that are less than specified range 
-    res = np.zeros(len(coords_inp))
+    res = np.zeros(len(coord_inp))
     for i in range(len(res)):
-        res[i] = haversine(coord_sta[0], coord_sta[1], coord_in[i,0], coord_inp[i,1])
+        res[i] = haversine(coord_sta[0], coord_sta[1], coord_inp[i,0], coord_inp[i,1])
     if rng != None:
         w = np.where(res < rng)
         # make sure that res is a numpy array
@@ -52,27 +52,26 @@ def rdf(coord_sta, coord_inp, rng=0.5, label_sta=None, plot_bin = 0.170):
     # 1 mile = 5280 ft, hence the default
     # also have a subplot that just plain 
     if plot_bin != False:
-        hist, bin_edges = np.histogram(res, bins=plot_bin)
+        #hist, bin_edges = np.histogram(res)#, bins=plot_bin)
         
-        f, axarr = plt.subplots(2, 2)
-        axarr[0, 0].hist(bin_edges, hist)
-        axarr[0, 0].set_title('Distance Frequency of Crime around ' + label_sta)
-        axarr[0, 1].scatter(coord_sta[0], coord_sta[1])
-        axarr[0, 1].scatter(coord_inp[w,0], coord_inp[w,1])
-        axarr[0, 1].set_title('Axis [0,1]')
-        #axarr[1, 0].plot(x, y ** 2)
-        #axarr[1, 0].set_title('Axis [1,0]')
-        #axarr[1, 1].scatter(x, y ** 2)
-        #axarr[1, 1].set_title('Axis [1,1]')
+        plt.figure()
+        plt.hist(res)
+        
+        plt.figure()
+        plt.scatter(coord_sta[0], coord_sta[1],color='k')
+        plt.scatter(coord_inp[w,0], coord_inp[w,1],color='g')
+        plt.show()
+        print w
+        print coord_inp
     
     
 dummy_sta = [40.756266207, -73.990501248]
-dummy_inp = [
+dummy_inp = np.asarray([
         [40.828754623, -73.866593516],
         [40.809859893, -73.937644103],
         [40.719711494, -73.9894242],
         [40.694514975, -73.849134227],
         [40.649370541, -73.960872294]
-        ]
+        ])
 
-rdf(dummy_sta, dummy_inp)
+rdf(dummy_sta, dummy_inp, rng=None)
