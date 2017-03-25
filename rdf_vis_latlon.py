@@ -51,22 +51,36 @@ def rdf(coord_sta, coord_inp, rng=0.5, wt=1, label_sta=None, plot_bin = 0.170/3)
     # now make a plot that shows frequency histogram
     # in NYC, average block is 264 x 900 ft
     # 1 mile = 5280 ft, hence the default
-    # also have a subplot that just plain 
-    print res
+    # also have a subplot that just shows the spatial distribution 
+
     # remember to apply the weight to this station!
+        
+    plt.figure()
+    plt.hist(res, bins=np.arange(0, max(res) + plot_bin, plot_bin))
+    plt.xlabel('miles from station')
+    plt.ylabel('crime occurence')
+    plt.title('Radial Distribution Function of Crime at Station: ' + label_sta)
     
-    if plot_bin != False:
-        #hist, bin_edges = np.histogram(res)#, bins=plot_bin)
-        
-        plt.figure()
-        plt.hist(res, bins=np.arange(0, max(res) + plot_bin, plot_bin)) 
-        
-        plt.figure()
+    plt_typ = 'scatter'
+    plt.figure()
+    if plt_typ == 'scatter':
         plt.scatter(coord_inp[w,0], coord_inp[w,1],color='g')
-        plt.scatter(coord_sta[0], coord_sta[1],color='k')
+        plt.scatter(coord_sta[0], coord_sta[1],color='r', marker='o')
+        plt.xlabel('longitude')
+        plt.ylabel('latitude')
+        plt.title('Spatial Distribution of Crime at Station: ' + label_sta)
+        axes = plt.gca()
+        xrng = axes.get_xlim()
+        yrng = axes.get_ylim()
         plt.show()
-        print w
-        print coord_inp
+    plt_typ = 'heatmap'
+    if plt_typ == 'heatmap':
+        import seaborn as sns
+        g = sns.jointplot(coord_inp[w,0], coord_inp[w,1], kind="kde", xlim=xrng, ylim=yrng)
+    
+    hist, bin_edges = np.histogram(res, bins=np.arange(0, max(res) + plot_bin, plot_bin))
+    
+    return hist, bin_edges
     
     
 #dummy_sta = [40.756266207, -73.990501248]
@@ -79,8 +93,27 @@ def rdf(coord_sta, coord_inp, rng=0.5, wt=1, label_sta=None, plot_bin = 0.170/3)
 #        ])
 #
 #rdf(dummy_sta, dummy_inp, rng=None, wt=1)
-#dummy_sta = [-73.998091, 40.660397]# BMT, 4 Avenue Line, 25th St
-dummy_sta = [-73.87255, 40.689941] #BMT	Broadway Jamaica	Cypress Hills	
+dummy_sta = [
+        #[-73.998091, 40.660397], # 
+        [-73.87255, 40.689941], #
+        #[	-73.981929, 40.768247],
+        [	-73.944216, 40.824783],
+        [	-73.810708, 40.70546],
+        [-73.839718, 40.682174],
+        [-73.945359, 40.815731],
+        [-73.792691, 40.707255]
+        ]
+label = [
+        #'BMT, 4 Avenue Line, 25th St',
+        'BMT, Broadway Jamaica Line, Cypress Hills',
+        #'BMT IRT, Broadway-7th Ave Line, 59th St-Columbus Circle',
+        'IND, 8 Avenue, 145th St',
+        'IND, Queens Boulevard, Sutphin Blvd',
+        '106th precinct, nearest Cypress Hills',
+        '32nd precinct, nearest 145th St'
+        '103rd precinct, nearest Sutphin Blvd'
+        ]
 df = pd.read_csv('C:\Users\Dat Tien Hoang\Downloads\NYPD_Complaint_Data_Current_YTD.csv')
 df = df[['Longitude', 'Latitude']].as_matrix()
-rdf(dummy_sta, df, rng=.5, wt=1)
+for i in range(len(dummy_sta)):
+    r1, r2 = rdf(dummy_sta[i], df, rng=.5, wt=1, label_sta=label[i])
