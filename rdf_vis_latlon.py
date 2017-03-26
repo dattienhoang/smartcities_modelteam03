@@ -54,8 +54,8 @@ def rdf(coord_sta, coord_inp, rng=0.5, wt=1, label_sta=None, plot_bin = 0.170/3)
     # also have a subplot that just shows the spatial distribution 
 
     # remember to apply the weight to this station!
-    plot = False
-    if plot == True:
+    plot = True
+    if plot == False:
         plt.figure()
         plt.hist(res, bins=np.arange(0, max(res) + plot_bin, plot_bin))
         plt.xlabel('miles from station')
@@ -77,25 +77,16 @@ def rdf(coord_sta, coord_inp, rng=0.5, wt=1, label_sta=None, plot_bin = 0.170/3)
         if plt_typ == 'heatmap':
             import seaborn as sns
             g = sns.jointplot(coord_inp[w,0], coord_inp[w,1], kind="kde", xlim=xrng, ylim=yrng)
-    
-    hist, bin_edges = np.histogram(res, bins=np.arange(0, max(res) + plot_bin, plot_bin))
-    hist = np.asarray(hist)
-    bin_edges = np.asarray(bin_edges)
-    norm = True
-    if norm == True:
-        hist = hist / sum(hist)
-    return hist, bin_edges
+    if len(res) != 0:
+        hist, bin_edges = np.histogram(res, bins=np.arange(0, max(res) + plot_bin, plot_bin))
+        hist = np.asarray(hist)
+        bin_edges = np.asarray(bin_edges)
+        norm = True
+        if norm == True:
+            hist = hist / sum(hist)
+        return hist, bin_edges
     
 
-#dummy_sta = [40.756266207, -73.990501248]
-#dummy_inp = np.asarray([
-#        [40.828754623, -73.866593516],
-#        [40.809859893, -73.937644103],
-#        [40.719711494, -73.9894242],
-#        [40.694514975, -73.849134227],
-#        [40.649370541, -73.960872294]
-#        ])
-#
 #rdf(dummy_sta, dummy_inp, rng=None, wt=1)
 #dummy_sta = [
 #        [-73.998091, 40.660397], # 
@@ -121,25 +112,61 @@ def rdf(coord_sta, coord_inp, rng=0.5, wt=1, label_sta=None, plot_bin = 0.170/3)
 df = pd.read_csv('C:\Users\Dat Tien Hoang\Downloads\NYPD_Complaint_Data_Current_YTD.csv')
 df = df[['Longitude', 'Latitude']].as_matrix()
 
-dummy_sta = pd.read_csv('C:\Users\Dat Tien Hoang\Downloads\NYC_Transit_Subway_Entrance_And_Exit_Data.csv')
-dummy_sta = dummy_sta[['Station Longitude', 'Station Latitude']].as_matrix()
+df2 = pd.read_csv('C:\Users\Dat Tien Hoang\Documents\GitHub\smartcities_modelteam03\station_traffic_location.csv')
+dummy_sta = df2[['stop_lon', 'stop_lat']].as_matrix()
+entries = df2[['entries_diff']].as_matrix()
+entries = entries / sum(entries)
+
+#dummy_sta = [
+##        [-73.998091, 40.660397], # 
+##        [-73.87255, 40.689941], #
+##        [	-73.981929, 40.768247],
+##        [	-73.944216, 40.824783],
+##        [	-73.810708, 40.70546]
+#        [-73.839718, 40.682174],
+#        [-73.945359, 40.815731],
+#        [-73.792691, 40.707255]
+#        ]
+#label = [
+##        '4th Avenue Line, 25th St',
+##        'Jamaica Line, Cypress Hills',
+##        'Broadway-7th Ave Line, 59th St-Columbus Circle',
+##        '8 Avenue Line, 145th St',
+##        'Queens Boulevard, Sutphin Blvd'
+#        '106th precinct, nearest Cypress Hills',
+#        '32nd precinct, nearest 145th St',
+#        '103rd precinct, nearest Sutphin Blvd'
+#        ]
 
 
+#counter = 0.
+#for i in range(len(dummy_sta)):
+#    r1, r2 = rdf(dummy_sta[i], df, rng=.5, wt=1, label_sta='')#label[i])#
+#    if max(r1) != 1.0:
+#        if i == 0:
+#            hist = r1
+#        else:
+#            hist = hist + r1
+#        counter += 1.
+# now take the average
+#hist /= counter
+
+#method with weighted average
 counter = 0.
 for i in range(len(dummy_sta)):
-    r1, r2 = rdf(dummy_sta[i], df, rng=.5, wt=1, label_sta='')#label[i])
-    if max(r1) != 1.0:
-        if i == 0:
-            hist = r1
-        else:
-            hist = hist + r1
-        counter += 1.
-# now take the average
-hist /= counter
+    if np.sum(dummy_sta[i]) != np.nan:
+        r1, r2 = rdf(dummy_sta[i], df, rng=.5, wt=1, label_sta='')#label[i])#
+        if max(r1) != 1.0:
+            if i == 0:
+                hist = r1 * entries[i]
+            else:
+                hist = hist + r1* entries[i]
+            counter += 1.
+
 
 # do some plot
 plt.figure()
 plt.plot(r2[1:len(r2)], r1)
 plt.xlabel('miles from station')
 plt.ylabel('crime occurence')
-plt.title('Radial Distribution Function of Crime at over stations')
+plt.title('Radial Distribution Function of Crime at Over All Stations')
