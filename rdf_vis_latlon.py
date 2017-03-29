@@ -138,31 +138,32 @@ entries = entries / sum(entries)
 #        '103rd precinct, nearest Sutphin Blvd'
 #        ]
 
-
-#counter = 0.
-#for i in range(len(dummy_sta)):
-#    r1, r2 = rdf(dummy_sta[i], df, rng=.5, wt=1, label_sta='')#label[i])#
-#    if max(r1) != 1.0:
-#        if i == 0:
-#            hist = r1
-#        else:
-#            hist = hist + r1
-#        counter += 1.
-# now take the average
-#hist /= counter
-
-#method with weighted average
-counter = 0.
-for i in range(len(dummy_sta)):
-    if np.sum(dummy_sta[i]) != np.nan:
+method = 'avg'
+if method == 'avg':
+    counter = 0.
+    for i in range(len(dummy_sta)):
         r1, r2 = rdf(dummy_sta[i], df, rng=.5, wt=1, label_sta='')#label[i])#
         if max(r1) != 1.0:
             if i == 0:
-                hist = r1 * entries[i]
+                hist = r1
             else:
-                hist = hist + r1* entries[i]
+                hist = hist + r1
             counter += 1.
+     now take the average
+    hist /= counter
 
+#method with weighted average
+if method == 'wtdavg':
+    counter = 0.
+    for i in range(len(dummy_sta)):
+        if np.sum(dummy_sta[i]) != np.nan:
+            r1, r2 = rdf(dummy_sta[i], df, rng=.5, wt=1, label_sta='')#label[i])#
+            if max(r1) != 1.0:
+                if i == 0:
+                    hist = r1 * entries[i]
+                else:
+                    hist = hist + r1* entries[i]
+                counter += 1.
 
 # do some plot
 plt.figure()
